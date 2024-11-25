@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
 import { Task, TaskPriority, TaskStatus } from '../../../models/task.model';
 import { CommonModule } from '@angular/common';
+import { TaskresumeComponent } from '../taskresume/taskresume.component';
+import { TaskEvent } from '../../../models/taskevent.model';
 
 @Component({
   selector: 'app-tasklist',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TaskresumeComponent],
   templateUrl: './tasklist.component.html',
   styleUrl: './tasklist.component.css'
 })
@@ -18,6 +20,25 @@ export class TasklistComponent {
     new Task (4,"Tarea 4", "Descripción Tarea 4",TaskPriority.HIGH,TaskStatus.COMPLETED,new Date("11/8/2024"),new Date("11/21/2024"),false),
     new Task (5,"Tarea 5", "Descripción Tarea 5",TaskPriority.MEDIUM,TaskStatus.PENDING,new Date("11/10/2024"),new Date("11/30/2024"),false)
   ]
+
+  modifyTask(taskevent:TaskEvent){
+    switch (taskevent.action) {
+      case "raiseTaskPriority":
+          this.raiseTaskPriority(taskevent.taskId);
+          break;
+      case "lowerTaskPriority":
+          this.lowerTaskPriority(taskevent.taskId);
+          break;
+      case "changeTaskStatus":
+          this.changeTaskStatus(taskevent.taskId);
+          break;
+      case "deleteTask":
+          this.deleteTask(taskevent.taskId); // Manejar el evento deleteTask
+          break;
+      default:
+          console.log("Unknown action:", taskevent.action);
+    }
+  }
 
   getTask(taskId:number):Task[]{
     return this.taskList.filter((tarea:Task)=>{
@@ -34,13 +55,16 @@ export class TasklistComponent {
     let tarea:Task = this.getTask(taskId)[0];
     tarea.lowerPriority();
   }
+  
   changeTaskStatus(taskId:number){
     let tarea:Task = this.getTask(taskId)[0];
     tarea.changeStatus();
   }
+
   editTask(taskId:number){
    console.log(`Editing Task with identify ${taskId}`);
   }
+
   deleteTask(taskId:number){
     this.taskList = this.taskList.filter((tarea:Task)=>{
       return tarea.id != taskId;
